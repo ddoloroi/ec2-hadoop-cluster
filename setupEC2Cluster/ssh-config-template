@@ -1,0 +1,23 @@
+Host namenode
+    HostName namenode_public_dns
+    User ubuntu
+    IdentityFile ~/.ssh/ec2-hadoop-cluster.pem
+    StrictHostKeyChecking no
+
+Host datanode1
+    HostName datanode1_public_dns
+    User ubuntu
+    IdentityFile ~/.ssh/ec2-hadoop-cluster.pem
+    StrictHostKeyChecking no
+
+Host datanode2
+    HostName datanode2_public_dns
+    User ubuntu
+    IdentityFile ~/.ssh/ec2-hadoop-cluster.pem
+    StrictHostKeyChecking no
+
+Host datanode3
+    HostName datanode3_public_dns
+    User ubuntu
+    IdentityFile ~/.ssh/ec2-hadoop-cluster.pem
+    StrictHostKeyChecking no

@@ -1,0 +1,13 @@
+#/etc/hosts
+sudo sed -i '2s/.*/namenode_public_dns namenode_hostname/' /etc/hosts
+sudo sed -i '3s/.*/datanode1_public_dns datanode1_hostname/' /etc/hosts
+sudo sed -i '4s/.*/datanode2_public_dns datanode2_hostname/' /etc/hosts
+sudo sed -i '5s/.*/datanode3_public_dns datanode3_hostname/' /etc/hosts
+
+#/masters
+sudo sed -i '1s/.*/namenode_hostname/' $HADOOP_CONF_DIR/masters
+
+#/slaves
+sudo sed -i '1s/.*/datanode1_hostname/' $HADOOP_CONF_DIR/slaves
+sudo sed -i '2s/.*/datanode2_hostname/' $HADOOP_CONF_DIR/slaves
+sudo sed -i '3s/.*/datanode3_hostname/' $HADOOP_CONF_DIR/slaves
