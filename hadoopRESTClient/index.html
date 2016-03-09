@@ -19,6 +19,9 @@
     <!-- Custom styles for this template -->
     <link href="bootstrap/dashboard.css" rel="stylesheet">
 
+    <!-- c3js -->
+    <link href="c3/c3.min.css" rel="stylesheet" type="text/css">
+
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="bootstrap/assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
     <script src="bootstrap/assets/js/ie-emulation-modes-warning.js"></script>
@@ -74,8 +77,10 @@
             <li><a href="">Another nav item</a></li>
           </ul>
         </div>
+
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <h1 class="page-header">Dashboard</h1>
+          <div id="chart"></div>
         </div>
       </div>
     </div>
@@ -91,6 +96,9 @@
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="bootstrap/assets/js/ie10-viewport-bug-workaround.js"></script>
 
+    <!-- Load d3.js and c3.js -->
+    <script src="c3/d3.min.js" charset="utf-8"></script>
+    <script src="c3/c3.min.js"></script>
 
     <!-- Hadoop -->
     <script src="dist/hadoop.js"></script>
