@@ -1,0 +1,15 @@
+{
+  "name": "hadoopRESTClient",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-concat": "~1.0.0"
+  }
+}
