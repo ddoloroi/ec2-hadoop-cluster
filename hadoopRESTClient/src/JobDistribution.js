@@ -5,11 +5,12 @@ H.JobDistribution = H.Class.extend({
         this._chart = c3.generate({
             bindto: '#jobdist-chart',
             data: {
+                x: 'time',
                 columns: []
             }
         });
-        this._startTime = 10000;
-        //this._queryInterval = setInterval(H.bind(this._queryJobs, this), 1000);
+        this._startTime = Date.now();
+        this._queryInterval = setInterval(H.bind(this._queryJobs, this), 100);
         this._queryJobs();
     },
 
@@ -23,24 +24,29 @@ H.JobDistribution = H.Class.extend({
     },
 
     _handleJobQuery: function (data) {
-        console.log(data);
+        if (!data.apps) {
+            return;
+        }
         var apps = data.apps.app;
         var done = apps.length > 0;
-        for (var i = 0; i < done.length; i++) {
+        for (var i = 0; i < apps.length; i++) {
             var app = apps[i];
             done = done && app.state === 'FINISHED';
             if (this._jobs[app.id] === undefined) {
                 this._jobs[app.id] = {};
                 this._jobs[app.id].name = app.name;
                 this._jobs[app.id].startedTime = app.startedTime;
-                this._jobs[app.id].data = [];
+                this._jobs[app.id].time = ['time'];
+                this._jobs[app.id].allocatedVCores = ['allocatedVCores'];
+                this._jobs[app.id].runningContainers = ['runningContainers'];
             }
-            this._jobs[app.id].data.push({
-                time: (Date.now() - this._startTime) / 100,
-                allocatedVCores: app.allocatedVCores,
-                runningContainers: app.runningContainers
-            });
+            this._jobs[app.id].time.push((Date.now() - this._startTime) / 100);
+            this._jobs[app.id].allocatedVCores.push(app.allocatedVCores);
+            this._jobs[app.id].runningContainers.push(app.runningContainers);
         }
+        this._chart.load({
+            columns: [this._jobs[app.id].time, this._jobs[app.id].allocatedVCores, this._jobs[app.id].runningContainers]
+        });
         if (done) {
             clearInterval(this._queryInterval);
             console.log('Job query done');
