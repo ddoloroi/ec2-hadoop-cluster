@@ -1,4 +1,6 @@
 window.onload = function () {
+    H.host = 'http://localhost:8088/ws/v1/cluster';
+    new H.UIBinding();
     var chart = c3.generate({
         bindto: '#chart',
         data: {

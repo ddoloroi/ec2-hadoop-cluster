@@ -9,6 +9,8 @@ module.exports = function(grunt) {
                     'src/Hadoop.js',
                     'src/Class.js',
                     'src/Util.js',
+                    'src/JobDistribution.js',
+                    'src/UIBinding.js',
                     'src/Main.js'
                 ],
                 dest: 'dist/hadoop.js'
