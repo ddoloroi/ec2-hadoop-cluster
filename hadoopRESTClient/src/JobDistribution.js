@@ -10,7 +10,7 @@ H.JobDistribution = H.Class.extend({
             }
         });
         this._startTime = Date.now();
-        this._queryInterval = setInterval(H.bind(this._queryJobs, this), 100);
+        this._queryInterval = setInterval(H.bind(this._queryJobs, this), 200);
         this._queryJobs();
     },
 
@@ -37,16 +37,17 @@ H.JobDistribution = H.Class.extend({
                 this._jobs[app.id].name = app.name;
                 this._jobs[app.id].startedTime = app.startedTime;
                 this._jobs[app.id].time = ['time'];
-                this._jobs[app.id].allocatedVCores = ['allocatedVCores'];
-                this._jobs[app.id].runningContainers = ['runningContainers'];
+                this._jobs[app.id].allocatedVCores = [app.id];
+                this._jobs[app.id].runningContainers = [app.id];
             }
             this._jobs[app.id].time.push((Date.now() - this._startTime) / 100);
-            this._jobs[app.id].allocatedVCores.push(app.allocatedVCores);
+            this._jobs[app.id].allocatedVCores.push(Math.max(0, app.allocatedVCores));
             this._jobs[app.id].runningContainers.push(app.runningContainers);
+
+            this._chart.load({
+                columns: [this._jobs[app.id].time, this._jobs[app.id].allocatedVCores]
+            });
         }
-        this._chart.load({
-            columns: [this._jobs[app.id].time, this._jobs[app.id].allocatedVCores, this._jobs[app.id].runningContainers]
-        });
         if (done) {
             clearInterval(this._queryInterval);
             console.log('Job query done');
