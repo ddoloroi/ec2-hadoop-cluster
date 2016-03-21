@@ -5,8 +5,16 @@ H.UIBinding = H.Class.extend({
             H.jobDistribution = new H.JobDistribution();
         });
 
+        $('#jobcompl').on('click', function () {
+            H.jobCompletionBar = new H.JobCompletionBar();
+        });
+
         $('#jobdist-download').on('click', function () {
             svgDownload('jobdist-chart');
+        });
+
+        $('#jobcompl-download').on('click', function () {
+            svgDownload('jobcompl-chart');
         });
     },
 
