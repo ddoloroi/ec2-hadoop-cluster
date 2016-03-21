@@ -10,6 +10,7 @@ module.exports = function(grunt) {
                     'src/Class.js',
                     'src/Util.js',
                     'src/JobDistribution.js',
+                    'src/JobCompletionBar.js',
                     'src/UIBinding.js',
                     'src/Main.js'
                 ],

@@ -17,7 +17,7 @@ H.JobDistribution = H.Class.extend({
     _queryJobs: function () {
         $.ajax({
             dataType: "json",
-            url: H.host + '/apps',
+            url: H.resourceManagerHost + '/apps',
             data: {startedTimeBegin: this._startTime},
             success: H.bind(this._handleJobQuery, this)
         });
