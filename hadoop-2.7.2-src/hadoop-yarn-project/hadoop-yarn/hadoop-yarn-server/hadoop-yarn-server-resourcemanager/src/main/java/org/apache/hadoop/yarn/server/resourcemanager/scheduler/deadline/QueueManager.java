@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair;
+package org.apache.hadoop.yarn.server.resourcemanager.scheduler.deadline;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,14 +49,14 @@ public class QueueManager {
 
   public static final String ROOT_QUEUE = "root";
   
-  private final FairScheduler scheduler;
+  private final DeadlineScheduler scheduler;
 
   private final Collection<FSLeafQueue> leafQueues = 
       new CopyOnWriteArrayList<FSLeafQueue>();
   private final Map<String, FSQueue> queues = new HashMap<String, FSQueue>();
   private FSParentQueue rootQueue;
 
-  public QueueManager(FairScheduler scheduler) {
+  public QueueManager(DeadlineScheduler scheduler) {
     this.scheduler = scheduler;
   }
   
