@@ -25,6 +25,7 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.server.resourcemanager.ResourceManager;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.deadline.DeadlineScheduler;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler;
 import org.apache.hadoop.yarn.util.StringHelper;
 import org.apache.hadoop.yarn.webapp.Controller;
@@ -82,13 +83,19 @@ public class RmController extends Controller {
       render(CapacitySchedulerPage.class);
       return;
     }
-    
+
     if (rs instanceof FairScheduler) {
       setTitle("Fair Scheduler");
       render(FairSchedulerPage.class);
       return;
     }
-    
+
+    if (rs instanceof DeadlineScheduler) {
+      setTitle("Deadline Scheduler");
+      render(DeadlineSchedulerPage.class);
+      return;
+    }
+
     setTitle("Default Scheduler");
     render(DefaultSchedulerPage.class);
   }
@@ -100,7 +107,7 @@ public class RmController extends Controller {
   public void submit() {
     setTitle("Application Submission Not Allowed");
   }
-  
+
   public void nodelabels() {
     setTitle("Node Labels");
     render(NodeLabelsPage.class);
