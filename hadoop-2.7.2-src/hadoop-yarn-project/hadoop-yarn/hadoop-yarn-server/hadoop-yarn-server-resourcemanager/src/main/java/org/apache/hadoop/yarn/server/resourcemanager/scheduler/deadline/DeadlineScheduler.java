@@ -192,7 +192,7 @@ public class DeadlineScheduler extends
   @VisibleForTesting
   AllocationConfiguration allocConf;
   
-  public FairScheduler() {
+  public DeadlineScheduler() {
     super(DeadlineScheduler.class.getName());
     clock = new SystemClock();
     allocsLoader = new AllocationFileLoaderService();

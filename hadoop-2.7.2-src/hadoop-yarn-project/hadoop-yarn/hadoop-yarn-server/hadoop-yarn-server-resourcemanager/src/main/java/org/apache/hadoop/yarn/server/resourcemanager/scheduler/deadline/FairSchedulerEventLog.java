@@ -60,13 +60,13 @@ class FairSchedulerEventLog {
   private boolean logDisabled = true;
 
   /**
-   * Log directory, set by mapred.fairscheduler.eventlog.location in conf file;
-   * defaults to {hadoop.log.dir}/fairscheduler.
+   * Log directory, set by mapred.deadlinescheduler.eventlog.location in conf file;
+   * defaults to {hadoop.log.dir}/deadlinescheduler.
    */
   private String logDir;
 
   /**
-   * Active log file, which is {LOG_DIR}/hadoop-{user}-fairscheduler.log.
+   * Active log file, which is {LOG_DIR}/hadoop-{user}-deadlinescheduler.log.
    * Older files are also stored as {LOG_FILE}.date (date format YYYY-MM-DD).
    */
   private String logFile;
@@ -86,7 +86,7 @@ class FairSchedulerEventLog {
           }
         }
         String username = System.getProperty("user.name");
-        logFile = String.format("%s%shadoop-%s-fairscheduler.log",
+        logFile = String.format("%s%shadoop-%s-deadlinescheduler.log",
             logDir, File.separator, username);
         logDisabled = false;
         PatternLayout layout = new PatternLayout("%d{ISO8601}\t%m%n");

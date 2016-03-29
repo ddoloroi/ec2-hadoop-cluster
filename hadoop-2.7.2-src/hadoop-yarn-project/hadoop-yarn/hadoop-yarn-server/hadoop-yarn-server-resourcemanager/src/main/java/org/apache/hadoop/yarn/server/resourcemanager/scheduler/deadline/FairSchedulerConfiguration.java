@@ -40,8 +40,8 @@ public class FairSchedulerConfiguration extends Configuration {
 
   public static final Log LOG = LogFactory.getLog(
       FairSchedulerConfiguration.class.getName());
-  
-  /** Increment request grant-able by the RM scheduler. 
+
+  /** Increment request grant-able by the RM scheduler.
    * These properties are looked up in the yarn-site.xml  */
   public static final String RM_SCHEDULER_INCREMENT_ALLOCATION_MB =
     YarnConfiguration.YARN_PREFIX + "scheduler.increment-allocation-mb";
@@ -49,12 +49,12 @@ public class FairSchedulerConfiguration extends Configuration {
   public static final String RM_SCHEDULER_INCREMENT_ALLOCATION_VCORES =
     YarnConfiguration.YARN_PREFIX + "scheduler.increment-allocation-vcores";
   public static final int DEFAULT_RM_SCHEDULER_INCREMENT_ALLOCATION_VCORES = 1;
-  
+
   private static final String CONF_PREFIX =  "yarn.scheduler.deadline.";
 
   public static final String ALLOCATION_FILE = CONF_PREFIX + "allocation.file";
   protected static final String DEFAULT_ALLOCATION_FILE = "fair-scheduler.xml";
-  
+
   /** Whether to enable the Fair Scheduler event log */
   public static final String EVENT_LOG_ENABLED = CONF_PREFIX + "event-log-enabled";
   public static final boolean DEFAULT_EVENT_LOG_ENABLED = false;
@@ -65,7 +65,7 @@ public class FairSchedulerConfiguration extends Configuration {
    */
   protected static final String ALLOW_UNDECLARED_POOLS = CONF_PREFIX + "allow-undeclared-pools";
   protected static final boolean DEFAULT_ALLOW_UNDECLARED_POOLS = true;
-  
+
   /** Whether to use the user name as the queue name (instead of "default") if
    * the request does not specify a queue. */
   protected static final String  USER_AS_DEFAULT_QUEUE = CONF_PREFIX + "user-as-default-queue";
@@ -106,7 +106,7 @@ public class FairSchedulerConfiguration extends Configuration {
   protected static final String PREEMPTION_THRESHOLD =
       CONF_PREFIX + "preemption.cluster-utilization-threshold";
   protected static final float DEFAULT_PREEMPTION_THRESHOLD = 0.8f;
-  
+
   protected static final String PREEMPTION_INTERVAL = CONF_PREFIX + "preemptionInterval";
   protected static final int DEFAULT_PREEMPTION_INTERVAL = 5000;
   protected static final String WAIT_TIME_BEFORE_KILL = CONF_PREFIX + "waitTimeBeforeKill";
@@ -132,7 +132,7 @@ public class FairSchedulerConfiguration extends Configuration {
   public FairSchedulerConfiguration() {
     super();
   }
-  
+
   public FairSchedulerConfiguration(Configuration conf) {
     super(conf);
   }
@@ -166,7 +166,7 @@ public class FairSchedulerConfiguration extends Configuration {
       DEFAULT_RM_SCHEDULER_INCREMENT_ALLOCATION_VCORES);
     return Resources.createResource(incrementMemory, incrementCores);
   }
-  
+
   public float getLocalityThresholdNode() {
     return getFloat(LOCALITY_THRESHOLD_NODE, DEFAULT_LOCALITY_THRESHOLD_NODE);
   }
@@ -214,16 +214,16 @@ public class FairSchedulerConfiguration extends Configuration {
   public boolean isEventLogEnabled() {
     return getBoolean(EVENT_LOG_ENABLED, DEFAULT_EVENT_LOG_ENABLED);
   }
-  
+
   public String getEventlogDir() {
     return get(EVENT_LOG_DIR, new File(System.getProperty("hadoop.log.dir",
-    		"/tmp/")).getAbsolutePath() + File.separator + "fairscheduler");
+    		"/tmp/")).getAbsolutePath() + File.separator + "deadlinescheduler");
   }
-  
+
   public int getPreemptionInterval() {
     return getInt(PREEMPTION_INTERVAL, DEFAULT_PREEMPTION_INTERVAL);
   }
-  
+
   public int getWaitTimeBeforeKill() {
     return getInt(WAIT_TIME_BEFORE_KILL, DEFAULT_WAIT_TIME_BEFORE_KILL);
   }
@@ -236,7 +236,7 @@ public class FairSchedulerConfiguration extends Configuration {
   /**
    * Parses a resource config value of a form like "1024", "1024 mb",
    * or "1024 mb, 3 vcores". If no units are given, megabytes are assumed.
-   * 
+   *
    * @throws AllocationConfigurationException
    */
   public static Resource parseResourceConfigValue(String val)
@@ -257,7 +257,7 @@ public class FairSchedulerConfiguration extends Configuration {
   public long getUpdateInterval() {
     return getLong(UPDATE_INTERVAL_MS, DEFAULT_UPDATE_INTERVAL_MS);
   }
-  
+
   private static int findResource(String val, String units)
     throws AllocationConfigurationException {
     Pattern pattern = Pattern.compile("(\\d+)\\s*" + units);
