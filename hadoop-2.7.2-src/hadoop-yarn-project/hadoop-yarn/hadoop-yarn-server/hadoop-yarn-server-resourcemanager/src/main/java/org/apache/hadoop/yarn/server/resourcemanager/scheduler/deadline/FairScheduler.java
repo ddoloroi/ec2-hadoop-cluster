@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair;
+package org.apache.hadoop.yarn.server.resourcemanager.scheduler.deadline;
 
 import java.io.IOException;
 import java.util.*;

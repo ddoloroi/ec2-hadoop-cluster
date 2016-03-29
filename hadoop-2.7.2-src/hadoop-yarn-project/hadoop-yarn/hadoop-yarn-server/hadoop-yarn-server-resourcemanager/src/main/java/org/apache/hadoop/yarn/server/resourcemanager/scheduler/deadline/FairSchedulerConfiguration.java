@@ -15,7 +15,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair;
+package org.apache.hadoop.yarn.server.resourcemanager.scheduler.deadline;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class FairSchedulerConfiguration extends Configuration {
     YarnConfiguration.YARN_PREFIX + "scheduler.increment-allocation-vcores";
   public static final int DEFAULT_RM_SCHEDULER_INCREMENT_ALLOCATION_VCORES = 1;
   
-  private static final String CONF_PREFIX =  "yarn.scheduler.fair.";
+  private static final String CONF_PREFIX =  "yarn.scheduler.deadline.";
 
   public static final String ALLOCATION_FILE = CONF_PREFIX + "allocation.file";
   protected static final String DEFAULT_ALLOCATION_FILE = "fair-scheduler.xml";

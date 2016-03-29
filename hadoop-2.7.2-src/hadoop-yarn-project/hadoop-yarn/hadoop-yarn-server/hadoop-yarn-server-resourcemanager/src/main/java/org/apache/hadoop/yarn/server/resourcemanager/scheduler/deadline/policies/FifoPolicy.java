@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.policies;
+package org.apache.hadoop.yarn.server.resourcemanager.scheduler.deadline.policies;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -24,9 +24,9 @@ import java.util.Comparator;
 import org.apache.hadoop.classification.InterfaceAudience.Private;
 import org.apache.hadoop.classification.InterfaceStability.Unstable;
 import org.apache.hadoop.yarn.api.records.Resource;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSQueue;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.Schedulable;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.SchedulingPolicy;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.deadline.FSQueue;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.deadline.Schedulable;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.deadline.SchedulingPolicy;
 import org.apache.hadoop.yarn.util.resource.Resources;
 
 import com.google.common.annotations.VisibleForTesting;
