@@ -7,6 +7,7 @@ H.JobCompletionBar = H.Class.extend({
             data: {
                 x: 'x',
                 type: 'bar',
+                order: null,
                 columns: []
             },
             bar: {
@@ -65,18 +66,17 @@ H.JobCompletionBar = H.Class.extend({
         var x = ['x'];
         var wait = ['Waiting'];
         var run = ['Running'];
-        var total = ['Total'];
 
         for (var i = 0; i < toPlot.length; i++) {
             var id = toPlot[i].id;
             x.push(id);
             wait.push((this._jobs[id].startTime - this._jobs[id].submitTime) / 1000);
             run.push((this._jobs[id].finishTime - this._jobs[id].startTime) / 1000);
-            total.push((this._jobs[id].finishTime - this._jobs[id].submitTime) / 1000);
         }
 
         this._chart.load({
-            columns: [x, wait, run, total]
+            columns: [x, wait, run],
         });
+        this._chart.groups([['Waiting', 'Running']]);
     }
 });
