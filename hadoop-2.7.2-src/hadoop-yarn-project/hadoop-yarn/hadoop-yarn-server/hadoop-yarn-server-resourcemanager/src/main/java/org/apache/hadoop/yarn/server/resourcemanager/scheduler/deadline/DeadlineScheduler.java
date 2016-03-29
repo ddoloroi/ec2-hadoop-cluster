@@ -114,7 +114,7 @@ import com.google.common.base.Preconditions;
 @LimitedPrivate("yarn")
 @Unstable
 @SuppressWarnings("unchecked")
-public class FairScheduler extends
+public class DeadlineScheduler extends
     AbstractYarnScheduler<FSAppAttempt, FSSchedulerNode> {
   private FairSchedulerConfiguration conf;
 
@@ -123,7 +123,7 @@ public class FairScheduler extends
   private volatile Clock clock;
   private boolean usePortForNodeName;
 
-  private static final Log LOG = LogFactory.getLog(FairScheduler.class);
+  private static final Log LOG = LogFactory.getLog(DeadlineScheduler.class);
   
   private static final ResourceCalculator RESOURCE_CALCULATOR =
       new DefaultResourceCalculator();
@@ -193,7 +193,7 @@ public class FairScheduler extends
   AllocationConfiguration allocConf;
   
   public FairScheduler() {
-    super(FairScheduler.class.getName());
+    super(DeadlineScheduler.class.getName());
     clock = new SystemClock();
     allocsLoader = new AllocationFileLoaderService();
     queueMgr = new QueueManager(this);
@@ -1505,7 +1505,7 @@ public class FairScheduler extends
     public void onReload(AllocationConfiguration queueInfo) {
       // Commit the reload; also create any queue defined in the alloc file
       // if it does not already exist, so it can be displayed on the web UI.
-      synchronized (FairScheduler.this) {
+      synchronized (DeadlineScheduler.this) {
         allocConf = queueInfo;
         allocConf.getDefaultSchedulingPolicy().initialize(clusterResource);
         queueMgr.updateAllocationConfiguration(allocConf);

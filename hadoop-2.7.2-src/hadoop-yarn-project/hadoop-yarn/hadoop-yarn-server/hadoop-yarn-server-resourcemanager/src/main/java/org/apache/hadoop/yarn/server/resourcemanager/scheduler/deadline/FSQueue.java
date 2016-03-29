@@ -44,7 +44,7 @@ public abstract class FSQueue implements Queue, Schedulable {
   private Resource fairShare = Resources.createResource(0, 0);
   private Resource steadyFairShare = Resources.createResource(0, 0);
   private final String name;
-  protected final FairScheduler scheduler;
+  protected final DeadlineScheduler scheduler;
   private final FSQueueMetrics metrics;
   
   protected final FSParentQueue parent;
@@ -57,7 +57,7 @@ public abstract class FSQueue implements Queue, Schedulable {
   private long minSharePreemptionTimeout = Long.MAX_VALUE;
   private float fairSharePreemptionThreshold = 0.5f;
 
-  public FSQueue(String name, FairScheduler scheduler, FSParentQueue parent) {
+  public FSQueue(String name, DeadlineScheduler scheduler, FSParentQueue parent) {
     this.name = name;
     this.scheduler = scheduler;
     this.metrics = FSQueueMetrics.forQueue(getName(), parent, true, scheduler.getConf());

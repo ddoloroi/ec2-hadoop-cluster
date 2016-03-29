@@ -49,7 +49,7 @@ public class FSParentQueue extends FSQueue {
   private Resource demand = Resources.createResource(0);
   private int runnableApps;
   
-  public FSParentQueue(String name, FairScheduler scheduler,
+  public FSParentQueue(String name, DeadlineScheduler scheduler,
       FSParentQueue parent) {
     super(name, scheduler, parent);
   }

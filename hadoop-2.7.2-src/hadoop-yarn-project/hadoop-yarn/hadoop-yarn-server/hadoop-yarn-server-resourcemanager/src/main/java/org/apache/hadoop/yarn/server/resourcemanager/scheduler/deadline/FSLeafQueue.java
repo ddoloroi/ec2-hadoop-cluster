@@ -70,7 +70,7 @@ public class FSLeafQueue extends FSQueue {
 
   private final ActiveUsersManager activeUsersManager;
   
-  public FSLeafQueue(String name, FairScheduler scheduler,
+  public FSLeafQueue(String name, DeadlineScheduler scheduler,
       FSParentQueue parent) {
     super(name, scheduler, parent);
     this.lastTimeAtMinShare = scheduler.getClock().getTime();

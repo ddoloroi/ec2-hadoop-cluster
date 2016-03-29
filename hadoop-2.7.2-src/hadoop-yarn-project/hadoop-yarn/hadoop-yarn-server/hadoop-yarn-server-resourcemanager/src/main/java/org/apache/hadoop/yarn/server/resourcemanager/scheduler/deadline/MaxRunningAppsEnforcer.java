@@ -36,16 +36,16 @@ import com.google.common.collect.ListMultimap;
  * constraints
  */
 public class MaxRunningAppsEnforcer {
-  private static final Log LOG = LogFactory.getLog(FairScheduler.class);
+  private static final Log LOG = LogFactory.getLog(DeadlineScheduler.class);
   
-  private final FairScheduler scheduler;
+  private final DeadlineScheduler scheduler;
 
   // Tracks the number of running applications by user.
   private final Map<String, Integer> usersNumRunnableApps;
   @VisibleForTesting
   final ListMultimap<String, FSAppAttempt> usersNonRunnableApps;
 
-  public MaxRunningAppsEnforcer(FairScheduler scheduler) {
+  public MaxRunningAppsEnforcer(DeadlineScheduler scheduler) {
     this.scheduler = scheduler;
     this.usersNumRunnableApps = new HashMap<String, Integer>();
     this.usersNonRunnableApps = ArrayListMultimap.create();

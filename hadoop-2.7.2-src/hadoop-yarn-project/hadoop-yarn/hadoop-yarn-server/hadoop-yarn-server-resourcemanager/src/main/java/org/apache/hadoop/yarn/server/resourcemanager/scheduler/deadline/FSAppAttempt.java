@@ -72,7 +72,7 @@ public class FSAppAttempt extends SchedulerApplicationAttempt
   private Priority priority;
   private ResourceWeights resourceWeights;
   private Resource demand = Resources.createResource(0);
-  private FairScheduler scheduler;
+  private DeadlineScheduler scheduler;
   private Resource fairShare = Resources.createResource(0, 0);
   private Resource preemptedResources = Resources.createResource(0);
   private RMContainerComparator comparator = new RMContainerComparator();
@@ -91,7 +91,7 @@ public class FSAppAttempt extends SchedulerApplicationAttempt
   private final Map<Priority, NodeType> allowedLocalityLevel =
       new HashMap<Priority, NodeType>();
 
-  public FSAppAttempt(FairScheduler scheduler,
+  public FSAppAttempt(DeadlineScheduler scheduler,
       ApplicationAttemptId applicationAttemptId, String user, FSLeafQueue queue,
       ActiveUsersManager activeUsersManager, RMContext rmContext) {
     super(applicationAttemptId, user, queue, activeUsersManager, rmContext);
@@ -489,7 +489,7 @@ public class FSAppAttempt extends SchedulerApplicationAttempt
    * @return
    *     If an assignment was made, returns the resources allocated to the
    *     container.  If a reservation was made, returns
-   *     FairScheduler.CONTAINER_RESERVED.  If no assignment or reservation was
+   *     DeadlineScheduler.CONTAINER_RESERVED.  If no assignment or reservation was
    *     made, returns an empty resource.
    */
   private Resource assignContainer(
@@ -538,14 +538,14 @@ public class FSAppAttempt extends SchedulerApplicationAttempt
 
       return container.getResource();
     } else {
-      if (!FairScheduler.fitsInMaxShare(getQueue(), capability)) {
+      if (!DeadlineScheduler.fitsInMaxShare(getQueue(), capability)) {
         return Resources.none();
       }
 
       // The desired container won't fit here, so reserve
       reserve(request.getPriority(), node, container, reserved);
 
-      return FairScheduler.CONTAINER_RESERVED;
+      return DeadlineScheduler.CONTAINER_RESERVED;
     }
   }
 

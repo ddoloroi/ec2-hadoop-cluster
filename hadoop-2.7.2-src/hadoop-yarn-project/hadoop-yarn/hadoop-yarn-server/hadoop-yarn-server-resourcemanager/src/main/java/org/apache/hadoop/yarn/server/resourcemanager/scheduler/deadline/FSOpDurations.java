@@ -32,7 +32,7 @@ import static org.apache.hadoop.metrics2.lib.Interns.info;
 import org.apache.hadoop.metrics2.lib.MutableRate;
 
 /**
- * Class to capture the performance metrics of FairScheduler.
+ * Class to capture the performance metrics of DeadlineScheduler.
  * This should be a singleton.
  */
 @InterfaceAudience.Private
@@ -56,7 +56,7 @@ public class FSOpDurations implements MetricsSource {
   MutableRate preemptCall;
 
   private static final MetricsInfo RECORD_INFO =
-      info("FSOpDurations", "Durations of FairScheduler calls or thread-runs");
+      info("FSOpDurations", "Durations of DeadlineScheduler calls or thread-runs");
 
   private final MetricsRegistry registry;
 

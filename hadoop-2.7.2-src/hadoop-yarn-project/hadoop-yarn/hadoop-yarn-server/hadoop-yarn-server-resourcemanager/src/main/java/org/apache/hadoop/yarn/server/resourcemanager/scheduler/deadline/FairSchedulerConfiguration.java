@@ -124,7 +124,7 @@ public class FairSchedulerConfiguration extends Configuration {
   protected static final String MAX_ASSIGN = CONF_PREFIX + "max.assign";
   protected static final int DEFAULT_MAX_ASSIGN = -1;
 
-  /** The update interval for calculating resources in FairScheduler .*/
+  /** The update interval for calculating resources in DeadlineScheduler .*/
   public static final String UPDATE_INTERVAL_MS =
       CONF_PREFIX + "update-interval-ms";
   public static final int DEFAULT_UPDATE_INTERVAL_MS = 500;
