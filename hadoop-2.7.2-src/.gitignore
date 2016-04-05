@@ -1,3 +1,5 @@
+*.iml
+.idea/
 hadoop-yarn-project/hadoop-yarn/hadoop-yarn-api/target/
 hadoop-yarn-project/hadoop-yarn/hadoop-yarn-applications/hadoop-yarn-applications-distributedshell/target/
 hadoop-yarn-project/hadoop-yarn/hadoop-yarn-applications/hadoop-yarn-applications-unmanaged-am-launcher/target/
