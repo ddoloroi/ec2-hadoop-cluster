@@ -68,6 +68,7 @@ import org.apache.hadoop.yarn.util.Records;
 @Public
 @Stable
 public abstract class ApplicationSubmissionContext {
+  protected int deadline;
 
   @Public
   @Stable
@@ -535,4 +536,12 @@ public abstract class ApplicationSubmissionContext {
   @Public
   @Unstable
   public abstract void setReservationID(ReservationId reservationID);
+
+  public void setDeadline(int deadline) {
+    this.deadline = deadline;
+  }
+
+  public int getDeadline() {
+    return this.deadline;
+  }
 }

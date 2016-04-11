@@ -208,10 +208,10 @@ message ApplicationAttemptReportProto {
 }
 
 enum NodeStateProto {
-  NS_NEW = 1; 
-  NS_RUNNING = 2; 
+  NS_NEW = 1;
+  NS_RUNNING = 2;
   NS_UNHEALTHY = 3;
-  NS_DECOMMISSIONED = 4; 
+  NS_DECOMMISSIONED = 4;
   NS_LOST = 5;
   NS_REBOOTED = 6;
 }
@@ -284,8 +284,8 @@ message PreemptionResourceRequestProto {
 }
 
 message ResourceBlacklistRequestProto {
-  repeated string blacklist_additions = 1; 
-  repeated string blacklist_removals = 2; 
+  repeated string blacklist_additions = 1;
+  repeated string blacklist_removals = 2;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -309,6 +309,7 @@ message ApplicationSubmissionContextProto {
   optional ReservationIdProto reservation_id = 15;
   optional string node_label_expression = 16;
   optional ResourceRequestProto am_container_resource_request = 17;
+  optional int32 deadline = 18 [default = 0];
 }
 
 message LogAggregationContextProto {
@@ -424,7 +425,7 @@ enum ContainerExitStatusProto {
 message ContainerResourceIncreaseRequestProto {
   optional ContainerIdProto container_id = 1;
   optional ResourceProto capability = 2;
-} 
+}
 
 message ContainerResourceIncreaseProto {
   optional ContainerIdProto container_id = 1;

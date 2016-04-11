@@ -1,0 +1,4 @@
+sudo cp hadoop-yarn-project/hadoop-yarn/hadoop-yarn-api/target/hadoop-yarn-api-2.7.2.jar /usr/local/hadoop/share/hadoop/yarn/hadoop-yarn-api-2.7.2.jar
+sudo cp hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-resourcemanager/target/hadoop-yarn-server-resourcemanager-2.7.2.jar /usr/local/hadoop/share/hadoop/yarn/hadoop-yarn-server-resourcemanager-2.7.2.jar
+sudo cp hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-jobclient/target/hadoop-mapreduce-client-jobclient-2.7.2.jar /usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-2.7.2.jar
+sudo cp hadoop-yarn-project/hadoop-yarn/hadoop-yarn-common/target/hadoop-yarn-common-2.7.2.jar /usr/local/hadoop/share/hadoop/yarn/hadoop-yarn-common-2.7.2.jar

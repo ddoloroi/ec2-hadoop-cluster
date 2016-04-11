@@ -904,7 +904,8 @@ public class RMAppImpl implements RMApp, Recoverable {
     public void transition(RMAppImpl app, RMAppEvent event) {
       app.handler.handle(new AppAddedSchedulerEvent(app.applicationId,
         app.submissionContext.getQueue(), app.user,
-        app.submissionContext.getReservationID()));
+        app.submissionContext.getReservationID(),
+        app.getApplicationSubmissionContext().getDeadline()));
     }
   }
 

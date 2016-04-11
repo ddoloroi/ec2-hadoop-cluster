@@ -790,6 +790,7 @@ public class DeadlineScheduler extends
     case APP_ADDED:
     {
       AppAddedSchedulerEvent appAddedEvent = (AppAddedSchedulerEvent) event;
+      LOG.info("A MERS: " + appAddedEvent.getDeadline());
       addApplication(appAddedEvent.getApplicationId(),
         appAddedEvent.getQueue(), appAddedEvent.getUser(),
         appAddedEvent.getIsAppRecovering());

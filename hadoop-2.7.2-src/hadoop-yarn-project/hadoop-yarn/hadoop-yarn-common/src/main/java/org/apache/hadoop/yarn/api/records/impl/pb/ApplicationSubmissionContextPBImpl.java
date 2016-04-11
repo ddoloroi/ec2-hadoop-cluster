@@ -356,6 +356,18 @@ extends ApplicationSubmissionContext {
   }
 
   @Override
+  public int getDeadline() {
+    ApplicationSubmissionContextProtoOrBuilder p = viaProto ? proto : builder;
+    return p.getDeadline();
+  }
+
+  @Override
+  public void setDeadline(int deadline) {
+    maybeInitBuilder();
+    builder.setDeadline(deadline);
+  }
+
+  @Override
   public Resource getResource() {
     ApplicationSubmissionContextProtoOrBuilder p = viaProto ? proto : builder;
     if (this.resource != null) {

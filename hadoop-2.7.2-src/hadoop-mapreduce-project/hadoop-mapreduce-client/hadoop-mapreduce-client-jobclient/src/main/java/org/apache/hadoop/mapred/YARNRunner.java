@@ -284,6 +284,11 @@ public class YARNRunner implements ClientProtocol {
     // Construct necessary information to start the MR AM
     ApplicationSubmissionContext appContext =
       createApplicationSubmissionContext(conf, jobSubmitDir, ts);
+    if (conf.get("deadline") != null) {
+      appContext.setDeadline(Integer.parseInt(conf.get("deadline")));
+    } else {
+      appContext.setDeadline(-1);
+    }
 
     // Submit to ResourceManager
     try {

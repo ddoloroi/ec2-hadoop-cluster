@@ -28,6 +28,7 @@ public class AppAddedSchedulerEvent extends SchedulerEvent {
   private final String user;
   private final ReservationId reservationID;
   private final boolean isAppRecovering;
+  private int deadline;
 
   public AppAddedSchedulerEvent(
       ApplicationId applicationId, String queue, String user) {
@@ -39,6 +40,11 @@ public class AppAddedSchedulerEvent extends SchedulerEvent {
     this(applicationId, queue, user, false, reservationID);
   }
 
+  public AppAddedSchedulerEvent(ApplicationId applicationId, String queue,
+      String user, ReservationId reservationID, int deadline) {
+    this(applicationId, queue, user, false, reservationID);
+    this.deadline = deadline;
+  }
   public AppAddedSchedulerEvent(ApplicationId applicationId, String queue,
       String user, boolean isAppRecovering, ReservationId reservationID) {
     super(SchedulerEventType.APP_ADDED);
@@ -67,5 +73,9 @@ public class AppAddedSchedulerEvent extends SchedulerEvent {
 
   public ReservationId getReservationID() {
     return reservationID;
+  }
+
+  public int getDeadline() {
+    return this.deadline;
   }
 }
