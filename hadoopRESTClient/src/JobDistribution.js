@@ -80,6 +80,7 @@ H.JobDistribution = H.Class.extend({
                     show: true
                 }
             },
+            zoom: {enabled: true},
             point: {show: false},
             transition: {duration: 50}
         });
