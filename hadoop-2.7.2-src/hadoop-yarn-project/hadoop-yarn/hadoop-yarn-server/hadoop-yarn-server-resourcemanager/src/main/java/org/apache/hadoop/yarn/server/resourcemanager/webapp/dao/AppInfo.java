@@ -73,6 +73,7 @@ public class AppInfo {
   protected long clusterId;
   protected String applicationType;
   protected String applicationTags = "";
+  protected int deadline;
   
   // these are only allowed if acls allow
   protected long startedTime;
@@ -128,6 +129,7 @@ public class AppInfo {
       this.queue = app.getQueue().toString();
       this.progress = app.getProgress() * 100;
       this.diagnostics = app.getDiagnostics().toString();
+      this.deadline = app.getApplicationSubmissionContext().getDeadline();
       if (diagnostics == null || diagnostics.isEmpty()) {
         this.diagnostics = "";
       }
