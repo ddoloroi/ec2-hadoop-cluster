@@ -16,6 +16,11 @@ H.UIBinding = H.Class.extend({
         $('#jobcompl-download').on('click', function () {
             svgDownload('jobcompl-chart');
         });
+
+        $('#jobdist-log').on('change', function (e) {
+            H.jobDistribution = new H.JobDistribution(true);
+            H.jobDistribution.onFilePickerChange(e);
+        });
     },
 
 });
