@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.StringTokenizer;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -146,7 +147,9 @@ public class MRBench {
      * Create the job configuration.
      */
     private static Job setupJob() throws Exception {
+        Random randomGenerator = new Random();
         Configuration conf = new Configuration();
+        conf.set("deadline", new Integer(randomGenerator.nextInt(100)).toString());
         Job job = Job.getInstance(conf, "mrbench: word count");
         job.setJarByClass(MRBench.class);
         job.setMapperClass(Map.class);
@@ -174,6 +177,7 @@ public class MRBench {
                     " input=" + FileInputFormat.getInputPaths(job)[0] +
                     " output=" + FileOutputFormat.getOutputPath(job));
 
+            LOG.info("[ID] " + job.ID + " / " + job.TASK_ID);
             // run the mapred task now
             job.submit();
         }
