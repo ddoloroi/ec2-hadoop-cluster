@@ -7,6 +7,7 @@ H.JobDistribution = H.Class.extend({
         if (!fromFile) {
             this._startTime = Date.now();
             this._queryInterval = setInterval(H.bind(this._queryJobs, this), 200);
+            this._displayInterval = setInterval(H.bind(this._displayJobs, this), 1500);
             this._queryJobs();
         }
     },
@@ -26,6 +27,7 @@ H.JobDistribution = H.Class.extend({
         }
         var apps = data.apps.app;
         var done = apps.length > 0;
+        this._jobs.time.push(((Date.now() - this._startTime) / 1000).toFixed(1));
         for (var i = 0; i < apps.length; i++) {
             var app = apps[i];
             done = done && app.state === 'FINISHED';
@@ -37,12 +39,12 @@ H.JobDistribution = H.Class.extend({
                 this._jobs[app.id].allocatedVCores = [app.id];
                 this._jobs[app.id].runningContainers = [app.id];
             }
-            this._jobs.time.push(((Date.now() - this._startTime) / 1000).toFixed(1));
             this._jobs[app.id].allocatedVCores.push(Math.max(0, app.allocatedVCores));
             this._jobs[app.id].runningContainers.push(app.runningContainers);
         }
         if (done) {
             clearInterval(this._queryInterval);
+            clearInterval(this._displayInterval);
             console.log('Job query done');
             this._displayJobs();
         }
