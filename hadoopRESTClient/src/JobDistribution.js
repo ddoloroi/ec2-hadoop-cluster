@@ -34,7 +34,7 @@ H.JobDistribution = H.Class.extend({
             if (this._jobs[app.id] === undefined) {
                 this._jobs[app.id] = {};
                 this._jobs[app.id].name = app.name;
-                this._jobs[app.id].deadline = app.deadline;
+                this._jobs[app.id].deadline = ((app.startedTime - this._startTime) / 1000 + app.deadline).toFixed(1);
                 this._jobs[app.id].startedTime = app.startedTime;
                 this._jobs[app.id].allocatedVCores = [app.id];
                 this._jobs[app.id].runningContainers = [app.id];
