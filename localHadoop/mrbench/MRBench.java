@@ -48,8 +48,8 @@ public class MRBench {
         new Path(System.getProperty("test.build.data","/benchmarks/MRBench"));
     private static Path INPUT_DIR = new Path(BASE_DIR, "mr_input");
     private static Path OUTPUT_DIR = new Path(BASE_DIR, "mr_output");
-
-    public static enum Order {RANDOM, ASCENDING, DESCENDING};
+    private static String[] files;
+    private static int[] deadlines;
 
     /**
      * Takes input format as text lines, runs some processing on it and
@@ -87,69 +87,13 @@ public class MRBench {
         }
     }
 
-
-    /**
-     * Generate a text file on the given filesystem with the given path name.
-     * The text file will contain the given number of lines of generated data.
-     * The generated data are string representations of numbers.    Each line
-     * is the same length, which is achieved by padding each number with
-     * an appropriate number of leading '0' (zero) characters.    The order of
-     * generated data is one of ascending, descending, or random.
-     */
-    public static void generateTextFile(FileSystem fs, Path inputFile,
-            long numLines, Order sortOrder) throws IOException
-    {
-        LOG.info("creating control file: "+numLines+" numLines, "+sortOrder+" sortOrder");
-        PrintStream output = null;
-        try {
-            output = new PrintStream(fs.create(inputFile));
-            int padding = String.valueOf(numLines).length();
-            switch(sortOrder) {
-            case RANDOM:
-                for (long l = 0; l < numLines; l++) {
-                    output.println(pad((new Random()).nextLong(), padding));
-                }
-                break;
-            case ASCENDING:
-                for (long l = 0; l < numLines; l++) {
-                    output.println(pad(l, padding));
-                }
-                break;
-            case DESCENDING:
-                for (long l = numLines; l > 0; l--) {
-                    output.println(pad(l, padding));
-                }
-                break;
-            }
-        } finally {
-            if (output != null)
-                output.close();
-        }
-        LOG.info("created control file: " + inputFile);
-    }
-
-    /**
-     * Convert the given number to a string and pad the number with
-     * leading '0' (zero) characters so that the string is exactly
-     * the given length.
-     */
-    private static String pad(long number, int length) {
-        String str = String.valueOf(number);
-        StringBuffer value = new StringBuffer();
-        for (int i = str.length(); i < length; i++) {
-            value.append("0");
-        }
-        value.append(str);
-        return value.toString();
-    }
-
     /**
      * Create the job configuration.
      */
-    private static Job setupJob() throws Exception {
+    private static Job setupJob(int deadline) throws Exception {
         Random randomGenerator = new Random();
         Configuration conf = new Configuration();
-        conf.set("deadline", new Integer(randomGenerator.nextInt(100)).toString());
+        conf.set("deadline", new Integer(deadline).toString());
         Job job = Job.getInstance(conf, "mrbench: word count");
         job.setJarByClass(MRBench.class);
         job.setMapperClass(Map.class);
@@ -157,7 +101,6 @@ public class MRBench {
         job.setReducerClass(Reducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
-        FileInputFormat.addInputPath(job, INPUT_DIR);
         return job;
     }
 
@@ -169,9 +112,25 @@ public class MRBench {
         ArrayList<Job> jobs = new ArrayList<>();
 
         for (int i = 0; i < numRuns; i++) {
-            Job job = setupJob();
-            jobs.add(job);
+            Job job;
+            if (deadlines.length == numRuns) {
+                job = setupJob(deadlines[i]);
+            } else {
+                int index = (int)Math.floor(Math.random() * deadlines.length);
+                job = setupJob(deadlines[index]);
+            }
+
+            if (files.length == numRuns) {
+                FileInputFormat.addInputPath(job, new Path(INPUT_DIR, files[i]));
+                job.setJobName(files[i]);
+            } else {
+                int index = (int)Math.floor(Math.random() * files.length);
+                FileInputFormat.addInputPath(job, new Path(INPUT_DIR, files[index]));
+                job.setJobName(files[index]);
+            }
+
             FileOutputFormat.setOutputPath(job, new Path(OUTPUT_DIR, "output_" + i));
+            jobs.add(job);
 
             LOG.info("Running job " + i + ":" +
                     " input=" + FileInputFormat.getInputPaths(job)[0] +
@@ -199,31 +158,24 @@ public class MRBench {
             "[-baseDir <base DFS path for output/input, default is /benchmarks/MRBench>] " +
             "[-jar <local path to job jar file containing Mapper and Reducer implementations, default is current jar file>] " +
             "[-numRuns <number of times to run the job, default is 1>] " +
-            "[-inputLines <number of input lines to generate, default is 1>] " +
-            "[-inputType <type of input to generate, one of ascending (default), descending, random>] " +
+            "[-inputFiles </file1,/file2/file3,etc>] " +
+            "[-deadlines <d1,d2,d3,etc>] " +
             "[-verbose]";
 
-        long inputLines = 1;
         int numRuns = 1;
         boolean verbose = false;
-        Order inputSortOrder = Order.ASCENDING;
         for (int i = 0; i < args.length; i++) { // parse command line
             if (args[i].equals("-numRuns")) {
                 numRuns = Integer.parseInt(args[++i]);
             } else if (args[i].equals("-baseDir")) {
                 BASE_DIR = new Path(args[++i]);
-            } else if (args[i].equals("-inputLines")) {
-                inputLines = Long.parseLong(args[++i]);
-            } else if (args[i].equals("-inputType")) {
-                String s = args[++i];
-                if (s.equalsIgnoreCase("ascending")) {
-                    inputSortOrder = Order.ASCENDING;
-                } else if (s.equalsIgnoreCase("descending")) {
-                    inputSortOrder = Order.DESCENDING;
-                } else if (s.equalsIgnoreCase("random")) {
-                    inputSortOrder = Order.RANDOM;
-                } else {
-                    inputSortOrder = null;
+            } else if (args[i].equals("-inputFiles")) {
+                files = args[++i].split(",");
+            } else if (args[i].equals("-deadlines")) {
+                String[] s = args[++i].split(",");
+                deadlines = new int[s.length];
+                for (int j = 0; j < s.length; j++) {
+                    deadlines[j] = Integer.parseInt(s[j]);
                 }
             } else if (args[i].equals("-verbose")) {
                 verbose = true;
@@ -234,8 +186,8 @@ public class MRBench {
         }
 
         if (numRuns < 1 ||    // verify args
-                inputLines < 0 ||
-                inputSortOrder == null)
+                files == null ||
+                deadlines == null)
             {
                 System.err.println(usage);
                 System.exit(-1);
@@ -244,7 +196,6 @@ public class MRBench {
         Configuration conf = new Configuration();
         FileSystem fs = FileSystem.get(conf);
         Path inputFile = new Path(INPUT_DIR, "input_" + (new Random()).nextInt() + ".txt");
-        generateTextFile(fs, inputFile, inputLines, inputSortOrder);
 
         // setup test output directory
         fs.mkdirs(BASE_DIR);
@@ -255,19 +206,16 @@ public class MRBench {
             System.out.println(e);
         } finally {
             // delete output -- should we really do this?
-            fs.delete(BASE_DIR, true);
+            fs.delete(OUTPUT_DIR, true);
         }
 
         if (verbose) {
             // Print out a report
             System.out.println("Total MapReduce jobs executed: " + numRuns);
-            System.out.println("Total lines of data per job: " + inputLines);
         }
-        int i = 0;
-        long totalTime = 0;
-        long avgTime = totalTime / numRuns;
-        System.out.println("DataLines\tAvgTime (milliseconds)");
-        System.out.println(inputLines + "\t\t" + avgTime);
+        for (Job job : jobs) {
+            System.out.println(job.getJobName() + ": " + (job.getFinishTime() - job.getStartTime()) / 1000 + "s");
+        }
         System.exit(0);
     }
 }
