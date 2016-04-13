@@ -51,10 +51,12 @@ H.JobDistribution = H.Class.extend({
     _displayJobs: function () {
         var columns = [this._jobs.time];
         var xs = {};
+        var max = 0;
         for (var key in this._jobs) {
             if (key !== 'time') {
                 xs[key] = 'time';
                 columns.push(this._jobs[key].allocatedVCores);
+                max = Math.max(max, Math.max.apply(null, this._jobs[key].allocatedVCores.slice(1)));
             }
         }
 
@@ -63,7 +65,7 @@ H.JobDistribution = H.Class.extend({
             if (key !== 'time') {
                 xs['deadline-' + key] = 'y-deadline-' + key;
                 columns.push(['y-deadline-' + key, this._jobs[key].deadline, this._jobs[key].deadline]);
-                columns.push(['deadline-' + key, 0, 4]);
+                columns.push(['deadline-' + key, 0, max + 1]);
             }
         }
         this._chart = c3.generate({
