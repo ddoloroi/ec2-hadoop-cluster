@@ -478,11 +478,11 @@ public class DeadlineScheduler extends
       appDeadline.estimateFinishTime(applications.get(appDeadline.getApplicationId())
               .getCurrentAppAttempt().getAppSchedulingInfo().getRequiredResources());
     }
+    Collections.sort(appDeadlines);
 
     // Try to assign containers to applications in fifo order
-    for (Map.Entry<ApplicationId, SchedulerApplication<FiCaSchedulerApp>> e : applications
-        .entrySet()) {
-      FiCaSchedulerApp application = e.getValue().getCurrentAppAttempt();
+    for (AppDeadline appDeadline : appDeadlines) {
+      FiCaSchedulerApp application = applications.get(appDeadline.getApplicationId()).getCurrentAppAttempt();
       if (application == null) {
         continue;
       }

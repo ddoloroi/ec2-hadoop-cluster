@@ -5,12 +5,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.ResourceRequest;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.resourcemanager.rmcontainer.RMContainer;
 
 import java.util.Date;
 
-public class AppDeadline {
+public class AppDeadline implements Comparable<AppDeadline>{
     private static final Log LOG = LogFactory.getLog(AppDeadline.class);
     private static Resource minAllocation;
 
@@ -61,6 +60,15 @@ public class AppDeadline {
             " factor=" + factor +
             " adjustedRunTime=" + runTime +
             " avgTimePerMinAllocation=" + avgTimePerMinAllocation);
+    }
+
+    public int compareTo(AppDeadline appDeadline) {
+        if (slack < appDeadline.slack)
+            return -1;
+        else if (slack > appDeadline.slack)
+            return 1;
+        else
+            return 0;
     }
 
     public static void setMinAllocation(Resource resource) {
