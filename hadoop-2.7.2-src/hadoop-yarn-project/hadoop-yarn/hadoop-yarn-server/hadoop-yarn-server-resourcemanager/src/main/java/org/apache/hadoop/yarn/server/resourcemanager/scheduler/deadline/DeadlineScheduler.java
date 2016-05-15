@@ -19,15 +19,10 @@
 package org.apache.hadoop.yarn.server.resourcemanager.scheduler.deadline;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience.LimitedPrivate;
@@ -113,6 +108,8 @@ public class DeadlineScheduler extends
   Configuration conf;
 
   private boolean usePortForNodeName;
+  private ArrayList<AppDeadline> appDeadlines = new ArrayList<>();
+  private Map<ApplicationId, AppDeadline> appDeadlinesMap = new HashMap<>();
 
   private ActiveUsersManager activeUsersManager;
 
@@ -229,6 +226,11 @@ public class DeadlineScheduler extends
     this.metrics = QueueMetrics.forQueue(DEFAULT_QUEUE_NAME, null, false,
         conf);
     this.activeUsersManager = new ActiveUsersManager(metrics);
+    AppDeadline.setMinAllocation(Resources.createResource(
+            conf.getInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB,
+                        YarnConfiguration.DEFAULT_RM_SCHEDULER_MINIMUM_ALLOCATION_MB),
+            conf.getInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_VCORES,
+                        YarnConfiguration.DEFAULT_RM_SCHEDULER_MINIMUM_ALLOCATION_VCORES)));
   }
 
   @Override
@@ -357,10 +359,13 @@ public class DeadlineScheduler extends
 
   @VisibleForTesting
   public synchronized void addApplication(ApplicationId applicationId,
-      String queue, String user, boolean isAppRecovering) {
+      String queue, String user, boolean isAppRecovering, int deadline) {
     SchedulerApplication<FiCaSchedulerApp> application =
         new SchedulerApplication<FiCaSchedulerApp>(DEFAULT_QUEUE, user);
     applications.put(applicationId, application);
+    AppDeadline appDeadline = new AppDeadline(applicationId, deadline);
+    appDeadlines.add(appDeadline);
+    appDeadlinesMap.put(applicationId, appDeadline);
     metrics.submitApp(user);
     LOG.info("Accepted application " + applicationId + " from user: " + user
         + ", currently num of applications: " + applications.size());
@@ -422,6 +427,8 @@ public class DeadlineScheduler extends
       applicationId);
     application.stop(finalState);
     applications.remove(applicationId);
+    appDeadlines.remove(appDeadlinesMap.get(applicationId));
+    appDeadlinesMap.remove(applicationId);
   }
 
   private synchronized void doneApplicationAttempt(
@@ -464,6 +471,13 @@ public class DeadlineScheduler extends
     LOG.debug("assignContainers:" +
         " node=" + node.getRMNode().getNodeAddress() +
         " #applications=" + applications.size());
+    LOG.info("assignContainers on: " + node);
+
+    // Compute the tentative finish times
+    for (AppDeadline appDeadline : appDeadlines) {
+      appDeadline.estimateFinishTime(applications.get(appDeadline.getApplicationId())
+              .getCurrentAppAttempt().getAppSchedulingInfo().getRequiredResources());
+    }
 
     // Try to assign containers to applications in fifo order
     for (Map.Entry<ApplicationId, SchedulerApplication<FiCaSchedulerApp>> e : applications
@@ -481,14 +495,18 @@ public class DeadlineScheduler extends
           continue;
         }
 
+        LOG.info("Trying to assign containers for: " + application.getApplicationId());
         for (Priority priority : application.getPriorities()) {
+          LOG.info("Priority: " + priority);
           int maxContainers =
             getMaxAllocatableContainers(application, priority, node,
                 NodeType.OFF_SWITCH);
           // Ensure the application needs containers of this priority
+          LOG.info("Max containers: " + maxContainers);
           if (maxContainers > 0) {
             int assignedContainers =
               assignContainersOnNode(node, application, priority);
+            LOG.info("Assigned containers: " + assignedContainers);
             // Do not assign out of order w.r.t priorities
             if (assignedContainers == 0) {
               break;
@@ -571,10 +589,13 @@ public class DeadlineScheduler extends
       assignOffSwitchContainers(node, application, priority);
 
 
-    LOG.debug("assignContainersOnNode:" +
+    LOG.info("have assigned Containers On Node:" +
         " node=" + node.getRMNode().getNodeAddress() +
         " application=" + application.getApplicationId().getId() +
         " priority=" + priority.getPriority() +
+        " #assignedLocal=" + nodeLocalContainers +
+        " #assignedRack=" + rackLocalContainers +
+        " #assignedSwitch=" + offSwitchContainers +
         " #assigned=" +
         (nodeLocalContainers + rackLocalContainers + offSwitchContainers));
 
@@ -790,10 +811,9 @@ public class DeadlineScheduler extends
     case APP_ADDED:
     {
       AppAddedSchedulerEvent appAddedEvent = (AppAddedSchedulerEvent) event;
-      LOG.info("A MERS: " + appAddedEvent.getDeadline());
       addApplication(appAddedEvent.getApplicationId(),
         appAddedEvent.getQueue(), appAddedEvent.getUser(),
-        appAddedEvent.getIsAppRecovering());
+        appAddedEvent.getIsAppRecovering(), appAddedEvent.getDeadline());
     }
     break;
     case APP_REMOVED:
@@ -892,7 +912,7 @@ public class DeadlineScheduler extends
         " released container " + container.getId() +
         " on node: " + node +
         " with event: " + event);
-
+    appDeadlinesMap.get(appId).addCompletedContainer(rmContainer);
   }
 
   private Resource usedResource = recordFactory.newRecordInstance(Resource.class);

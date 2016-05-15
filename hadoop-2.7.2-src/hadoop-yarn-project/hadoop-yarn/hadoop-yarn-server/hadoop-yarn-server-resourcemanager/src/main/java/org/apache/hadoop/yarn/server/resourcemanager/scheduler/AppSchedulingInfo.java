@@ -40,6 +40,7 @@ import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.Priority;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.ResourceRequest;
+import org.apache.hadoop.yarn.api.records.impl.pb.ResourcePBImpl;
 import org.apache.hadoop.yarn.server.resourcemanager.rmapp.attempt.RMAppAttemptState;
 import org.apache.hadoop.yarn.server.resourcemanager.rmcontainer.RMContainer;
 import org.apache.hadoop.yarn.server.resourcemanager.rmcontainer.RMContainerState;
@@ -62,6 +63,8 @@ public class AppSchedulingInfo {
   // TODO making containerIdCounter long
   private final AtomicLong containerIdCounter;
   private final int EPOCH_BIT_SHIFT = 40;
+
+  private ResourceRequest requiredResources = ResourceRequest.newInstance(null, null, Resource.newInstance(0, 0), 0);
 
   final Set<Priority> priorities = new TreeSet<Priority>(
       new org.apache.hadoop.yarn.server.resourcemanager.resource.Priority.Comparator());
@@ -112,9 +115,11 @@ public class AppSchedulingInfo {
    * Clear any pending requests from this application.
    */
   private synchronized void clearRequests() {
+    logRequests("clearRequests");
     priorities.clear();
     requests.clear();
     LOG.info("Application " + applicationId + " requests cleared");
+    updateRequiredResources();
   }
 
   public long getNewContainerId() {
@@ -140,6 +145,12 @@ public class AppSchedulingInfo {
       boolean updatePendingResources = false;
       ResourceRequest lastRequest = null;
 
+      LOG.info("updateResourceRequests app=" + getApplicationId() +
+              " resourceName=" + resourceName +
+              " priority=" + priority +
+              " memory=" + request.getCapability().getMemory() +
+              " vcores=" + request.getCapability().getVirtualCores() +
+              " numContainers=" + request.getNumContainers());
       if (resourceName.equals(ResourceRequest.ANY)) {
         if (LOG.isDebugEnabled()) {
           LOG.debug("update:" + " application=" + applicationId + " request="
@@ -193,6 +204,56 @@ public class AppSchedulingInfo {
             lastRequestCapability);
       }
     }
+    logRequests("updateResourceRequests");
+    updateRequiredResources();
+  }
+
+  synchronized private void updateRequiredResources() {
+    int totalMemory = 0;
+    int totalVCores = 0;
+    int totalContainers = 0;
+    for (Priority priority : requests.keySet()) {
+      // compute the maximum request per priority
+      Map<String, ResourceRequest> priorityRequests = requests.get(priority);
+      int maxMemory = 0;
+      int maxVCores = 0;
+      int maxContainers = 0;
+      for (String resourceName : priorityRequests.keySet()) {
+        ResourceRequest request = priorityRequests.get(resourceName);
+        if (request.getNumContainers() > 0) {
+          maxMemory = Math.max(maxMemory, request.getCapability().getMemory());
+          maxVCores = Math.max(maxVCores, request.getCapability().getVirtualCores());
+          maxContainers = Math.max(maxContainers, request.getNumContainers());
+        }
+      }
+      totalMemory += maxMemory;
+      totalVCores += maxVCores;
+      totalContainers += maxContainers;
+    }
+    requiredResources.getCapability().setMemory(totalMemory);
+    requiredResources.getCapability().setVirtualCores(totalVCores);
+    requiredResources.setNumContainers(totalContainers);
+  }
+
+  synchronized public ResourceRequest getRequiredResources() {
+    return requiredResources;
+  }
+
+  synchronized  public void logRequests(String calledFrom) {
+    String out = "Requests for " + getApplicationId() + " called from: " + calledFrom + "\n";
+    for (Priority priority : requests.keySet()) {
+      Map<String, ResourceRequest> priorityRequests = requests.get(priority);
+      for (String resourceName : priorityRequests.keySet()) {
+        ResourceRequest request = priorityRequests.get(resourceName);
+        out += "Request priority=" + priority +
+                " resourceName=" + resourceName +
+                " memory=" + request.getCapability().getMemory() +
+                " vCores=" + request.getCapability().getVirtualCores() +
+                " numContainers=" + request.getNumContainers() +
+                "\n";
+      }
+    }
+    LOG.info(out);
   }
 
   /**
@@ -288,6 +349,8 @@ public class AppSchedulingInfo {
           + " resource=" + request.getCapability());
     }
     metrics.allocateResources(user, 1, request.getCapability(), true);
+    logRequests("allocate");
+    updateRequiredResources();
     return resourceRequests;
   }
 
