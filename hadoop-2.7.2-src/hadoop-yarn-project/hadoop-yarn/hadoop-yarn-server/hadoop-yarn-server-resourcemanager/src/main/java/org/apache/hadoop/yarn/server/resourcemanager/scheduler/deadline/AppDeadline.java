@@ -36,8 +36,12 @@ public class AppDeadline {
     }
 
     public void estimateFinishTime(ResourceRequest resourceRequest) {
-        int minAllocations = resourceRequest.getCapability().getMemory() * resourceRequest.getCapability().getVirtualCores() *
+        int minAllocations = (resourceRequest.getCapability().getMemory() / minAllocation.getMemory()) *
+                (resourceRequest.getCapability().getVirtualCores() / minAllocation.getVirtualCores()) *
                 resourceRequest.getNumContainers();
+        LOG.info("minAllocations memory=" + resourceRequest.getCapability().getMemory() +
+            " vCores=" + resourceRequest.getCapability().getVirtualCores() +
+            " containers=" + resourceRequest.getNumContainers());
         estimatedFinishTime = System.currentTimeMillis() / 1000 + avgTimePerMinAllocation * minAllocations;
         slack = deadline - estimatedFinishTime;
         LOG.info("Estimated finish time = " + new Date(estimatedFinishTime * 1000) +
