@@ -5,7 +5,7 @@ import sys
 ec2 = boto3.resource('ec2')
 
 instances = ec2.create_instances(
-        ImageId='ami-5fe20e30', 
+        ImageId='ami-31e30f5e',
         InstanceType='t2.micro', 
         SecurityGroups=['Hadoop'],
         SecurityGroupIds=['sg-fc744f95'],
