@@ -22,6 +22,8 @@ public class AppDeadline implements Comparable<AppDeadline>{
     private int maxQueueLength = 3;
     private long queueSum = 0;
     private Queue<Long> lastRunTimes = new PriorityQueue<>();
+    private ResourceRequest resourceRequest;
+    private int containersCreated = 0;
 
     private ApplicationId applicationId;
 
@@ -39,6 +41,7 @@ public class AppDeadline implements Comparable<AppDeadline>{
     }
 
     public void estimateFinishTime(ResourceRequest resourceRequest) {
+        this.resourceRequest = resourceRequest;
         int minAllocations = (resourceRequest.getCapability().getMemory() / minAllocation.getMemory()) *
                 (resourceRequest.getCapability().getVirtualCores() / minAllocation.getVirtualCores()) *
                 resourceRequest.getNumContainers();
@@ -49,6 +52,10 @@ public class AppDeadline implements Comparable<AppDeadline>{
         slack = deadline - estimatedFinishTime;
         LOG.info("Estimated finish time = " + new Date(estimatedFinishTime * 1000) +
             " deadline = " + new Date(deadline * 1000));
+    }
+
+    public void estimateFinishTime() {
+        estimateFinishTime(this.resourceRequest);
     }
 
     public void addCompletedContainer(RMContainer rmContainer) {
@@ -70,7 +77,15 @@ public class AppDeadline implements Comparable<AppDeadline>{
             " avgTimePerMinAllocation=" + avgTimePerMinAllocation);
     }
 
+    public void increaseCreatedContainers() {
+        containersCreated += 1;
+        resourceRequest.setNumContainers(Math.max(0, resourceRequest.getNumContainers() - 1));
+    }
+
     public int compareTo(AppDeadline appDeadline) {
+        if (containersCreated < 2)
+            return -1;
+
         if (slack < appDeadline.slack)
             return -1;
         else if (slack > appDeadline.slack)

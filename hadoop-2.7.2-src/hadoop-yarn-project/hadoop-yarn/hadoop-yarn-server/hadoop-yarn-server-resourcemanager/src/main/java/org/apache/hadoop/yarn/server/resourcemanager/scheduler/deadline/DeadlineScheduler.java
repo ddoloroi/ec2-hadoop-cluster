@@ -479,48 +479,49 @@ public class DeadlineScheduler extends
               .getCurrentAppAttempt().getAppSchedulingInfo().getRequiredResources());
     }
     Collections.sort(appDeadlines);
+    while (!Resources.lessThan(resourceCalculator, clusterResource,
+            node.getAvailableResource(), minimumAllocation)) {
+      Collections.sort(appDeadlines);
+      boolean allAppsProcessed = true;
+      for (AppDeadline appDeadline : appDeadlines) {
+        FiCaSchedulerApp application = applications.get(appDeadline.getApplicationId()).getCurrentAppAttempt();
+        int assigned = 0;
 
-    // Try to assign containers to applications in fifo order
-    for (AppDeadline appDeadline : appDeadlines) {
-      FiCaSchedulerApp application = applications.get(appDeadline.getApplicationId()).getCurrentAppAttempt();
-      if (application == null) {
-        continue;
-      }
+        LOG.debug("pre-assignContainers");
+        application.showRequests();
+        synchronized (application) {
+          // Check if this resource is on the blacklist
+          if (SchedulerAppUtils.isBlacklisted(application, node, LOG)) {
+            continue;
+          }
 
-      LOG.debug("pre-assignContainers");
-      application.showRequests();
-      synchronized (application) {
-        // Check if this resource is on the blacklist
-        if (SchedulerAppUtils.isBlacklisted(application, node, LOG)) {
-          continue;
-        }
-
-        LOG.info("Trying to assign containers for: " + application.getApplicationId());
-        for (Priority priority : application.getPriorities()) {
-          LOG.info("Priority: " + priority);
-          int maxContainers =
-            getMaxAllocatableContainers(application, priority, node,
-                NodeType.OFF_SWITCH);
-          // Ensure the application needs containers of this priority
-          LOG.info("Max containers: " + maxContainers);
-          if (maxContainers > 0) {
-            int assignedContainers =
-              assignContainersOnNode(node, application, priority);
-            LOG.info("Assigned containers: " + assignedContainers);
-            // Do not assign out of order w.r.t priorities
-            if (assignedContainers == 0) {
-              break;
+          LOG.info("Trying to assign containers for: " + application.getApplicationId());
+          for (Priority priority : application.getPriorities()) {
+            LOG.info("Priority: " + priority);
+            int maxContainers =
+                    getMaxAllocatableContainers(application, priority, node,
+                            NodeType.OFF_SWITCH);
+            // Ensure the application needs containers of this priority
+            LOG.info("Max containers: " + maxContainers);
+            if (maxContainers > 0) {
+              int assignedContainers =
+                      assignContainersOnNode(node, application, priority);
+              assigned += assignedContainers;
+              LOG.info("Assigned containers: " + assignedContainers);
+              // Do not assign out of order w.r.t priorities
+              if (assignedContainers == 0) {
+                break;
+              }
+              appDeadline.increaseCreatedContainers();
             }
           }
         }
+        if (assigned > 0) {
+          allAppsProcessed = false;
+          break;
+        }
       }
-
-      LOG.debug("post-assignContainers");
-      application.showRequests();
-
-      // Done
-      if (Resources.lessThan(resourceCalculator, clusterResource,
-              node.getAvailableResource(), minimumAllocation)) {
+      if (allAppsProcessed) {
         break;
       }
     }
@@ -685,6 +686,8 @@ public class DeadlineScheduler extends
                                                                         // zero would
                                                                         // crash the
                                                                         // scheduler.
+    // TODO maybe
+    assignableContainers = Math.min(assignableContainers, 1);
     int assignedContainers =
       Math.min(assignableContainers, availableContainers);
 

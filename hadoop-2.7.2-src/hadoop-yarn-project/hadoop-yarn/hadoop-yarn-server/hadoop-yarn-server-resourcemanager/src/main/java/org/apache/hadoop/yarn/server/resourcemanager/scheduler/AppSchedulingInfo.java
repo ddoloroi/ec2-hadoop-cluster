@@ -236,6 +236,7 @@ public class AppSchedulingInfo {
   }
 
   synchronized public ResourceRequest getRequiredResources() {
+    updateRequiredResources();
     return requiredResources;
   }
 
