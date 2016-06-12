@@ -1,9 +1,9 @@
 H.JobDistribution = H.Class.extend({
 
     initialize: function (fromFile) {
-        this._jobs = {
-            time: ['time']
-        };
+        this._jobs = {};
+        this._maxResources = 0;
+        this._maxTime = 15;
         if (!fromFile) {
             this._startTime = Date.now();
             this._queryInterval = setInterval(H.bind(this._queryJobs, this), 200);
@@ -27,10 +27,13 @@ H.JobDistribution = H.Class.extend({
         }
         var apps = data.apps.app;
         var done = apps.length > 0;
-        this._jobs.time.push(((Date.now() - this._startTime) / 1000).toFixed(1));
+        var now = ((Date.now() - this._startTime) / 1000).toFixed(1);
         for (var i = 0; i < apps.length; i++) {
             var app = apps[i];
             done = done && app.state === 'FINISHED';
+            if (app.state == 'FINISHED') {
+                continue;
+            }
             if (this._jobs[app.id] === undefined) {
                 this._jobs[app.id] = {};
                 this._jobs[app.id].name = app.name;
@@ -38,9 +41,14 @@ H.JobDistribution = H.Class.extend({
                 this._jobs[app.id].startedTime = app.startedTime;
                 this._jobs[app.id].allocatedVCores = [app.id];
                 this._jobs[app.id].runningContainers = [app.id];
+                this._jobs[app.id].time = ['time-' + app.id];
+                this._maxTime = Math.max(this._maxTime, this._jobs[app.id].deadline);
             }
             this._jobs[app.id].allocatedVCores.push(Math.max(0, app.allocatedVCores));
             this._jobs[app.id].runningContainers.push(app.runningContainers);
+            this._jobs[app.id].time.push(now);
+            this._maxResources = Math.max(this._maxResources, app.allocatedVCores);
+            this._maxTime = Math.max(this._maxTime, now);
         }
         if (done) {
             clearInterval(this._queryInterval);
@@ -51,35 +59,38 @@ H.JobDistribution = H.Class.extend({
     },
 
     _displayJobs: function () {
-        var columns = [this._jobs.time];
+        if (this._chart) {
+            this._chart.destroy();
+        }
+        var columns = [];
         var xs = {};
-        var max = 0;
-        for (var key in this._jobs) {
-            if (key !== 'time') {
-                xs[key] = 'time';
-                columns.push(this._jobs[key].allocatedVCores);
-                max = Math.max(max, Math.max.apply(null, this._jobs[key].allocatedVCores.slice(1)));
-            }
+        var count = 1;
+        var names = {};
+        for (var id in this._jobs) {
+            xs[id] = 'time-' + id;
+            columns.push(this._jobs[id].allocatedVCores);
+            columns.push(this._jobs[id].time);
+            names[id] = 'Application ' + count;
+            names['deadline-' + id] = 'Deadline ' + count;
+            count += 1;
         }
 
-        for (var key in this._jobs) {
+        for (var id in this._jobs) {
             // add deadlines later so that we get the nicer colors for the lines
-            if (key !== 'time') {
-                xs['deadline-' + key] = 'y-deadline-' + key;
-                columns.push(['y-deadline-' + key, this._jobs[key].deadline, this._jobs[key].deadline]);
-                columns.push(['deadline-' + key, 0, max + 1]);
-            }
+            xs['deadline-' + id] = 'y-deadline-' + id;
+            columns.push(['y-deadline-' + id, this._jobs[id].deadline, this._jobs[id].deadline]);
+            columns.push(['deadline-' + id, 0, this._maxResources]);
         }
-        maxTime = Math.max.apply(0, this._jobs.time.slice(1));
         values = [];
-        for (var i = 0; i < maxTime; i += parseInt(maxTime / 15)) {
+        for (var i = 0; i < this._maxTime; i += parseInt(this._maxTime / 15)) {
             values.push(i);
         }
         this._chart = c3.generate({
             bindto: '#jobdist-chart',
             data: {
                 xs: xs,
-                columns: columns
+                columns: columns,
+                names: names
             },
             grid: {
                 x: {
@@ -91,8 +102,18 @@ H.JobDistribution = H.Class.extend({
             },
             axis: {
                 x: {
+                    label: {
+                        text: 'Time (s)',
+                        position: 'outer-center'
+                    },
                     tick: {
                         values: values
+                    }
+                },
+                y: {
+                    label: {
+                        text: 'Virtual cores',
+                        position: 'outer-center'
                     }
                 }
             },
@@ -112,14 +133,22 @@ H.JobDistribution = H.Class.extend({
     onFilePickerChange: function (e) {
         var reader = new FileReader();
         reader.onload = H.bind(function (e) {
-           this._jobs = JSON.parse(e.target.result);
+           var obj = JSON.parse(e.target.result);
+           this._jobs = obj['jobs']
+           this._maxTime = obj['maxTime']
+           this._maxResources = obj['maxResources']
            this._displayJobs()
-        }, this);
+        },this);
         reader.readAsText(e.target.files[0]);
     },
 
     save: function () {
-        var blob = new Blob([JSON.stringify(this._jobs, undefined, 4)], {type: 'text/plain'}),
+        var obj = {
+            jobs: this._jobs,
+            maxTime: this._maxTime,
+            maxResources: this._maxResources
+        }
+        var blob = new Blob([JSON.stringify(obj, undefined, 4)], {type: 'text/plain'}),
             e = document.createEvent('MouseEvents'),
             a = document.createElement('a');
 
