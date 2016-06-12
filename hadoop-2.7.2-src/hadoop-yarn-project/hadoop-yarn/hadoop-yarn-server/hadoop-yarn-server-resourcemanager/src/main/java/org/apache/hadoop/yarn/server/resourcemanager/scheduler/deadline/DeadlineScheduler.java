@@ -516,6 +516,7 @@ public class DeadlineScheduler extends
             }
           }
         }
+        appDeadline.estimateFinishTime();
         if (assigned > 0) {
           allAppsProcessed = false;
           break;

@@ -8,7 +8,7 @@ import org.apache.hadoop.yarn.api.records.ResourceRequest;
 import org.apache.hadoop.yarn.server.resourcemanager.rmcontainer.RMContainer;
 
 import java.util.Date;
-import java.util.PriorityQueue;
+import java.util.LinkedList;
 import java.util.Queue;
 
 public class AppDeadline implements Comparable<AppDeadline>{
@@ -21,7 +21,7 @@ public class AppDeadline implements Comparable<AppDeadline>{
     private long avgTimePerMinAllocation;
     private int maxQueueLength = 3;
     private long queueSum = 0;
-    private Queue<Long> lastRunTimes = new PriorityQueue<>();
+    private Queue<Long> lastRunTimes = new LinkedList<>();
     private ResourceRequest resourceRequest;
     private int containersCreated = 0;
 
@@ -58,7 +58,7 @@ public class AppDeadline implements Comparable<AppDeadline>{
         estimateFinishTime(this.resourceRequest);
     }
 
-    public void addCompletedContainer(RMContainer rmContainer) {
+    synchronized public void addCompletedContainer(RMContainer rmContainer) {
         long runTime = (rmContainer.getFinishTime() - rmContainer.getCreationTime()) / 1000;
         Resource usedResource = rmContainer.getAllocatedResource();
         int factor = (usedResource.getMemory() / minAllocation.getMemory()) *
