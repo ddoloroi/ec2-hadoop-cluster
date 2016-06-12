@@ -70,6 +70,11 @@ H.JobDistribution = H.Class.extend({
                 columns.push(['deadline-' + key, 0, max + 1]);
             }
         }
+        maxTime = Math.max.apply(0, this._jobs.time.slice(1));
+        values = [];
+        for (var i = 0; i < maxTime; i += parseInt(maxTime / 15)) {
+            values.push(i);
+        }
         this._chart = c3.generate({
             bindto: '#jobdist-chart',
             data: {
@@ -84,9 +89,16 @@ H.JobDistribution = H.Class.extend({
                     show: true
                 }
             },
+            axis: {
+                x: {
+                    tick: {
+                        values: values
+                    }
+                }
+            },
             zoom: {enabled: true},
             point: {show: false},
-            transition: {duration: 50}
+            transition: {duration: 0}
         });
         var colors = this._chart.data.colors();
         for (var key in this._jobs) {
