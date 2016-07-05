@@ -213,8 +213,15 @@ public class MRBench {
             // Print out a report
             System.out.println("Total MapReduce jobs executed: " + numRuns);
         }
+        int i = 0;
+        System.out.println("JonName,runTime,deadline,slack,weightedSlack");
         for (Job job : jobs) {
-            System.out.println(job.getJobName() + ": " + (job.getFinishTime() - job.getStartTime()) / 1000 + "s");
+            long runTime = (job.getFinishTime() - job.getStartTime()) / 1000;
+            long deadline = (long)deadlines[i];
+            long slack = deadline > runTime ? 0 : runTime - deadline;
+            long weightedSlack = (long)((float)slack / deadline * 100);
+            System.out.println(String.format("%s,%d,%d,%d,%d", job.getJobID(), runTime, deadline, slack, weightedSlack));
+            i += 1;
         }
         System.exit(0);
     }

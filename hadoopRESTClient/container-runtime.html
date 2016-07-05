@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="bootstrap/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="bootstrap/dashboard.css" rel="stylesheet">
+
+    <!-- c3js -->
+    <link href="c3/c3.min.css" rel="stylesheet" type="text/css">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="bootstrap/assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="bootstrap/assets/js/ie-emulation-modes-warning.js"></script>
+
+  </head>
+
+  <body>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="bootstrap/assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+    <script src="bootstrap/assets/js/vendor/holder.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="bootstrap/assets/js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- Load d3.js and c3.js -->
+    <script src="c3/d3.min.js" charset="utf-8"></script>
+    <script src="c3/c3.min.js"></script>
+
+    <!-- Hadoop -->
+    <script src="dist/hadoop.js"></script>
+    <div id="chart"></div>
+    <script>
+        d3.csv('container-runtime.csv', function (csv) {
+            var chart = c3.generate({
+                bindto: '#chart',
+                data: {
+                    json: csv,
+                    keys: {
+                        value: ['runTime', 'avgTimePerMinAllocation']
+                    },
+                    names: {
+                        'runTime': 'Container run time',
+                        'avgTimePerMinAllocation': 'Estimated time per minimum allocation'
+                    }
+                },
+                axis: {
+                    y: {
+                        label: 'Container run time'
+                    },
+                    x: {
+                        label: 'Containers'
+                    }
+                },
+                grid: {
+                    x: {
+                        show: true
+                    },
+                    y: {
+                        show: true
+                    }
+                }
+            })
+        });
+
+        function svgDownload(id) {
+            id = 'chart';
+            $.ajax({
+                url: "c3/c3.min.css",
+                dataType: "text",
+                success: function (css) {
+                    css = css.replace(/\.c3 /g, '');
+                    var target = $('#' + id + ' svg')[0];
+                    target = document.getElementsByTagName('svg')[0];
+                    //getStyles(target);
+
+                    var s = document.createElement('style');
+                    s.setAttribute('type', 'text/css');
+                    s.innerHTML = "<![CDATA[\n" + css + "\n]]>";
+
+                    var defs = document.createElement('defs');
+                    defs.appendChild(s);
+                    target.insertBefore(defs, target.firstChild);
+
+                    var wrap = document.createElement('div');
+                    wrap.appendChild(target.cloneNode(true));
+                    var html = wrap.innerHTML;
+
+                    var dataURL = 'data:image/svg+xml;base64,'+ btoa(html);
+                    var a = document.createElement('a');
+                    a.href = dataURL;
+                    a.download = id + '.svg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            });
+        }
+    </script>
+  </body>
+</html>

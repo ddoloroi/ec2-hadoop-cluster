@@ -7,7 +7,7 @@ H.JobDistribution = H.Class.extend({
         if (!fromFile) {
             this._startTime = Date.now();
             this._queryInterval = setInterval(H.bind(this._queryJobs, this), 200);
-            this._displayInterval = setInterval(H.bind(this._displayJobs, this), 10000);
+            this._displayInterval = setInterval(H.bind(this._displayJobs, this), 3000);
             this._queryJobs();
         }
     },
